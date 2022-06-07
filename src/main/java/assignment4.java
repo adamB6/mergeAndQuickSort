@@ -19,15 +19,17 @@ import java.util.List;
  */
 public class assignment4 {
 
+    public static int count = 0;
+
     public static void main(String args[]) throws Exception {
 
         List<double[]> arrays = new ArrayList<>();
         double[] runTimes = new double[10000];
 
         // Load file with saved ArrayList if it exists
-        // Change to sorted.dat for the sorted array
+        // Change to sorted.dat for the sorted arrays
         try {
-            FileInputStream fileInputStream = new FileInputStream("sorted.dat");
+            FileInputStream fileInputStream = new FileInputStream("unsorted.dat");
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             arrays = (List) objectInputStream.readObject();
             objectInputStream.close();
@@ -38,10 +40,34 @@ public class assignment4 {
         if (arrays.isEmpty()) {
             generateArrays(arrays);
         }
+        
+        //sort and print counts
+        for (int i = 0; i < 10000; i++) {
+            quickSort(arrays.get(i), 0, 999);
+            System.out.println(i + ": " + count);
+            runTimes[i] = count;
+            count = 0;
+        }
 
+        mergeSort(runTimes);
+        System.out.println("Minimum Runtime: " + runTimes[0]);
+        System.out.println("Maximum Runtime: " + runTimes[9999]);
+        System.out.println("Average Runtime: " + average(runTimes));
+        System.out.println("Standard Deviation: " + standardDeviation(runTimes));
+
+        //testing arrays
+        /*
+        for (int i = 0; i < 10000; i++) {
+            System.out.print("before: " + Arrays.toString(arrays.get(i)) + "\n");
+        }
+        for (int i = 0; i < 10000; i++) {
+            System.out.print("after: " + Arrays.toString(arrays.get(i)) + "\n");
+        }
+         */
         //run sorting algorithm and record times for all 10000
         //change mergeSort(arrays.get(i) to quickSort(arrays.get(i), 0, 999)
         //and vice versa
+        /*
         for (int i = 0; i < 10000; i++) {
             double start = System.nanoTime();
             mergeSort(arrays.get(i));
@@ -55,22 +81,7 @@ public class assignment4 {
         System.out.println("Average Runtime: " + average(runTimes));
         System.out.println("Standard Deviation: " + calculateSD(runTimes));
 
-        //testing arrays
-        /*
-        
-        System.out.print("before: \n");
-        for (int i = 0; i < 10000; i++) {
-
-            System.out.print("before: " + Arrays.toString(arrays.get(i)) + "\n");
-        }
-        
-        System.out.print("after: \n");
-        for (int i = 0; i < 10000; i++) {
-
-            System.out.print("Arrays.toString(arrays.get(i)) + "\n");
-        }
-        
-  
+         */
         //used to save sorted dat
         /*
         try {
@@ -97,6 +108,7 @@ public class assignment4 {
 
         for (int i = 0; i < mid; i++) {
             left[i] = array[i];
+
         }
         mergeSort(left);
 
@@ -118,14 +130,17 @@ public class assignment4 {
             } else {
                 main[i++] = right[r++];
             }
+            count++;
         }
 
         while (l < left.length) {
             main[i++] = left[l++];
+            count++;
         }
 
         while (r < right.length) {
             main[i++] = right[r++];
+            count++;
         }
     }
 
@@ -154,6 +169,7 @@ public class assignment4 {
     }
 
     public static void quickSort(double[] array, int left, int right) {
+
         if (left < right) {
 
             double pivot = partition(array, left, right);
@@ -164,26 +180,38 @@ public class assignment4 {
     }
 
     public static double partition(double[] array, int left, int right) {
-        double pivot = array[right];
+        double pivot = array[left];
+        int i = left;
+        int j = right;
 
-        int i = left - 1;
-
-        for (int j = left; j <= right; j++) {
-
-            if (array[j] < pivot) {
+        while (i < j) {
+            while (i < j && array[j] >= pivot) {
+                j--;
+                count++;
+            }
+            if (i < j) {
+                array[i++] = array[j];
+            }
+            while (i < j && array[i] <= pivot) {
                 i++;
-                double temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
+                count++;
+            }
+            if (i < j) {
+                array[j--] = array[i];
             }
         }
-        double temp = array[i + 1];
-        array[i + 1] = array[right];
-        array[right] = temp;
-        return (i + 1);
+
+        array[i] = pivot;
+        return i;
     }
 
-    public static double calculateSD(double[] runTimes) {
+    public static void swap(double array[], int l, int r) {
+        double temp = array[l];
+        array[l] = array[r];
+        array[r] = temp;
+    }
+
+    public static double standardDeviation(double[] runTimes) {
         double sum = 0.0, sd = 0.0;
 
         for (int i = 0; i < runTimes.length; i++) {
@@ -205,7 +233,7 @@ public class assignment4 {
         for (int i = 0; i < 10000; i++) {
             sum += runTimes[i];
         }
-        return sum / 9999;
+        return sum / 10000;
     }
 
 }
